@@ -6,7 +6,7 @@ pipeline {
         SONAR_PROJECT_KEY = 'prudhvi-boot'
         ECR_REPO_URI = '448049787674.dkr.ecr.us-west-1.amazonaws.com/prudhvi-boot'
         AWS_REGION = 'us-west-1'
-        TRIVY_IMAGE = 'aquasec/trivy:latest'
+        TRIVY_IMAGE = 'aquasec/trivy:0.45.0'  // Pinned version for stability
         RECIPIENT_EMAIL = 'nandhuraj0303@gmail.com'
     }
 
@@ -49,23 +49,21 @@ pipeline {
         stage('Build & Scan') {
             steps {
                 script {
-                    // Build with both version and latest tags
                     def dockerImage = docker.build(
                         "${ECR_REPO_URI}:${BUILD_NUMBER}",
                         "--file Dockerfile ."
                     )
-                    
-                    // Add additional 'latest' tag
                     dockerImage.tag('latest')
                     
-                    // Trivy scan
+                    // Updated Trivy command with correct flags
                     sh(script: """
                         docker run --rm \
                         -v /var/run/docker.sock:/var/run/docker.sock \
                         ${TRIVY_IMAGE} \
                         --exit-code 1 \
+                        image \
                         --severity HIGH,CRITICAL \
-                        --no-progress \
+                        --quiet \
                         ${ECR_REPO_URI}:${BUILD_NUMBER}
                     """, returnStatus: true)
                 }
@@ -76,7 +74,6 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry("https://${ECR_REPO_URI}", 'ecr:us-west-1:aws-credentials') {
-                        // Push both tags
                         docker.image("${ECR_REPO_URI}:${BUILD_NUMBER}").push()
                         docker.image("${ECR_REPO_URI}:latest").push()
                     }
@@ -95,19 +92,24 @@ pipeline {
                 subject: "SUCCESS: ${currentBuild.fullDisplayName}",
                 body: """<p>Build succeeded!</p>
                 <p>ECR Image: ${ECR_REPO_URI}:${BUILD_NUMBER}</p>
-                <p>SonarQube Report: http://54.183.40.137:9000/dashboard?id=${SONAR_PROJECT_KEY}</p>""",
-                to: env.RECIPIENT_EMAIL,
-                mimeType: 'text/html'
+                <p>SonarQube Report: <a href="http://54.183.40.137:9000/dashboard?id=${SONAR_PROJECT_KEY}">Link</a></p>
+                <p>Build URL: <a href="${BUILD_URL}">${BUILD_URL}</a></p>""",
+                to: "${RECIPIENT_EMAIL}",
+                replyTo: "${RECIPIENT_EMAIL}",
+                mimeType: 'text/html',
+                recipientProviders: [[$class: 'DevelopersRecipientProvider']]
             )
         }
         failure {
             emailext(
                 subject: "FAILED: ${currentBuild.fullDisplayName}",
                 body: """<p>Build failed! Check logs:</p>
-                <p><a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
-                to: env.RECIPIENT_EMAIL,
+                <p><a href="${BUILD_URL}">${BUILD_URL}</a></p>""",
+                to: "${RECIPIENT_EMAIL}",
+                replyTo: "${RECIPIENT_EMAIL}",
                 mimeType: 'text/html',
-                attachLog: true
+                attachLog: true,
+                recipientProviders: [[$class: 'DevelopersRecipientProvider']]
             )
         }
     }
