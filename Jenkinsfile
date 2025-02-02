@@ -45,8 +45,21 @@ pipeline {
                 }
             }
         }
+		
+        stage('Dependency trivy Scan') {
+            steps {
+                sh """
+                docker run --rm \
+                -v ${WORKSPACE}:/app \
+                ${TRIVY_IMAGE} \
+                fs --exit-code 1 \
+                --severity HIGH,CRITICAL \
+                /app
+                """
+            }
+        }
 
-        stage('Build & Scan') {
+        stage('Build & Trivy Scan') {
             steps {
                 script {
                     def dockerImage = docker.build(
@@ -55,16 +68,15 @@ pipeline {
                     )
                     dockerImage.tag('latest')
                     
-                    sh(script: """
+                    sh """
                         docker run --rm \
                         -v /var/run/docker.sock:/var/run/docker.sock \
                         ${TRIVY_IMAGE} \
-                        --exit-code 1 \
-                        image \
+                        image --exit-code 1 \
                         --severity HIGH,CRITICAL \
                         --quiet \
                         ${ECR_REPO_URI}:${BUILD_NUMBER}
-                    """, returnStatus: true)
+                    """
                 }
             }
         }
