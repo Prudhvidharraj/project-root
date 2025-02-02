@@ -6,7 +6,7 @@ pipeline {
         SONAR_PROJECT_KEY = 'prudhvi-boot'
         ECR_REPO_URI = '448049787674.dkr.ecr.us-west-1.amazonaws.com/prudhvi-boot'
         AWS_REGION = 'us-west-1'
-        TRIVY_IMAGE = 'aquasec/trivy:0.45.0'  // Pinned version for stability
+        TRIVY_IMAGE = 'aquasec/trivy:0.45.0' 
         RECIPIENT_EMAIL = 'nandhuraj0303@gmail.com'
     }
 
@@ -55,7 +55,6 @@ pipeline {
                     )
                     dockerImage.tag('latest')
                     
-                    // Updated Trivy command with correct flags
                     sh(script: """
                         docker run --rm \
                         -v /var/run/docker.sock:/var/run/docker.sock \
