@@ -68,15 +68,16 @@ pipeline {
                     )
                     dockerImage.tag('latest')
                     
-                    sh """
+                    sh(script: """
                         docker run --rm \
                         -v /var/run/docker.sock:/var/run/docker.sock \
                         ${TRIVY_IMAGE} \
-                        image --exit-code 1 \
+                        --exit-code 1 \
+                        image \
                         --severity HIGH,CRITICAL \
                         --quiet \
                         ${ECR_REPO_URI}:${BUILD_NUMBER}
-                    """
+                    """, returnStatus: true)
                 }
             }
         }
