@@ -9,9 +9,7 @@ WORKDIR /app
 RUN groupadd -r spring && useradd -r -g spring spring \
     && chown -R spring:spring /app
 USER spring
-
 COPY --from=build --chown=spring:spring /app/target/prudhvi-boot-*-jar-with-dependencies.jar app.jar
-
 HEALTHCHECK --interval=30s --timeout=3s \
   CMD curl -f http://localhost:8080/health || exit 1
 ENV TZ=America/Los_Angeles
