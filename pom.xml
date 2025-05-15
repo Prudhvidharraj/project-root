@@ -15,27 +15,22 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <sonar.host.url>http://54.183.40.137:9000</sonar.host.url>
         <sonar.projectKey>prudhvi-boot</sonar.projectKey>
-        <!-- Added logging version -->
         <logback.version>1.4.14</logback.version>
         <sparkjava.version>2.9.4</sparkjava.version>
         <javax.mail.version>1.6.2</javax.mail.version>
     </properties>
 
     <dependencies>
-        <!-- Test dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
-
-        <!-- Spark Framework -->
         <dependency>
             <groupId>com.sparkjava</groupId>
             <artifactId>spark-core</artifactId>
             <version>${sparkjava.version}</version>
-            <!-- Exclude default SLF4J simple logger -->
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -43,46 +38,40 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
-        <!-- Logging implementation -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>${logback.version}</version>
         </dependency>
-
-        <!-- Java Mail -->
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>javax.mail</artifactId>
             <version>${javax.mail.version}</version>
         </dependency>
-
-        <!-- Jakarta Activation -->
         <dependency>
             <groupId>jakarta.activation</groupId>
             <artifactId>jakarta.activation-api</artifactId>
             <version>2.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+            <version>9.4.57.v20241219</version>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <!-- Compiler plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
             </plugin>
-
-            <!-- Test execution -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.2</version>
             </plugin>
-
-            <!-- Fat JAR creation -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.4.2</version>
@@ -106,8 +95,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <!-- SonarQube integration -->
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
